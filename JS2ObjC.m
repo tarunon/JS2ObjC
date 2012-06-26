@@ -174,6 +174,8 @@ BOOL webViewSwizzed;
         }
         if (_return) {
             [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"JS2ObjC_Return='%@';", _return]];
+        } else {
+            [webView stringByEvaluatingJavaScriptFromString:@"JS2ObjC_Return='';"];
         }
         return NO;
     }
@@ -181,7 +183,6 @@ BOOL webViewSwizzed;
 }
 
 @end
-
 
 static id dummy(){return nil;}
 
