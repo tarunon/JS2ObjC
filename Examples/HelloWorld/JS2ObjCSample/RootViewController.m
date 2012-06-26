@@ -19,7 +19,7 @@
     UIWebView* webView = [[UIWebView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     NSURL* url = [[[NSBundle mainBundle] resourceURL] URLByAppendingPathComponent:@"server/index.html"];
     [webView loadRequest:[NSURLRequest requestWithURL:url]];
-    //webView.delegate = self; // ここを有効にするとWebViewのロードが失敗してる
+    webView.delegate = self;
     self.view = webView;
 }
 

@@ -40,6 +40,11 @@ BOOL webViewSwizzed;
     return NO;
 }
 
+- (BOOL)webView_ConJS_OriginalMissing:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+{
+    return [standardJS2ObjC webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+}
+
 @end
 
 @implementation UIWebView(JS2ObjC)
@@ -118,7 +123,11 @@ BOOL webViewSwizzed;
     if (![swizzedDelegateClassName containsObject:klass]) {
         [swizzedDelegateClassName addObject:klass];
         swizz(klass, @selector(webViewDidFinishLoad:), @selector(webViewDidFinishLoad_ConJS:));
-        swizz(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), @selector(webView_ConJS:shouldStartLoadWithRequest:navigationType:));
+        if ([delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
+            swizz(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), @selector(webView_ConJS:shouldStartLoadWithRequest:navigationType:));
+        } else {
+            swizz(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), @selector(webView_ConJS_OriginalMissing:shouldStartLoadWithRequest:navigationType:));
+        }
     }
 }
 
