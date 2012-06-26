@@ -34,9 +34,10 @@ BOOL webViewSwizzed;
 
 - (BOOL)webView_ConJS:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
-    [standardJS2ObjC webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
-    [self webView_ConJS:webView shouldStartLoadWithRequest:request navigationType:navigationType];
-    return YES;
+    if ([standardJS2ObjC webView:webView shouldStartLoadWithRequest:request navigationType:navigationType]) {
+        return [self webView_ConJS:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+    }
+    return NO;
 }
 
 @end
