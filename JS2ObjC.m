@@ -141,13 +141,15 @@ BOOL webViewSwizzed;
 - (void)webViewDidFinishLoad:(UIWebView *)webView
 {
     for (NSString *key in jsFunctions.allKeys) {
+      if([[[webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(window.%@ == undefined)", key]] uppercaseString] isEqualToString:@"TRUE"]){
         [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"function %@(){var u='JS2ObjC://%@';for(var i=0;i<arguments.length;i++){u=u+'\t'+encodeURIComponent(arguments[i]);}var t=document.createElement('A');t.setAttribute('href',u);var e=document.createEvent('MouseEvent');e.initMouseEvent('click');t.dispatchEvent(e);return JS2ObjC_Return;}", key, key]];
+      }
     }
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
-    if ([request.URL.scheme isEqualToString:@"JS2ObjC"]) {
+    if ([[request.URL.scheme uppercaseString] isEqualToString:@"JS2OBJC"]) {
         NSArray *operationCodes = [[request.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] componentsSeparatedByString:@"\t"];
         NSString *jsfunc = [[operationCodes objectAtIndex:0] substringFromIndex:10];
         id target = [[jsFunctions objectForKey:jsfunc] objectAtIndex:0];
