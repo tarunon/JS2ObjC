@@ -27,10 +27,11 @@ Connect Javascript and Objective-C at iOS application.
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
- I'm sure the behavior in iOS5.x.
+ I'm sure the behavior in iOS5.x and Xcode 4.4 later.
  Initialize an instance using 'standardJS2ObjC',
  and connect JavaScript's function and Objective-C's function.
  You must do before create an instance of UIWebView.
  The Objective-C's functions return value must be NSString.
- The Objective-C's functions argument is one NSArray including NSString(s)
- that JavaScript's functions argument(s).
+ The Objective-C's functions argument are one NSArray including NSString(s)
+ that JavaScript's functions argument(s), and webview that called JavaScript's function.
+ You can create blocks object from JavaScript's function string.

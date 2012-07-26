@@ -15,7 +15,7 @@
 void swizz(Class klass, SEL sel1, SEL sel2);
 
 NSMutableSet *swizzedDelegateClassName;
-NSMutableDictionary *jsFunctions;
+NSMutableDictionary *jsFunctions, *webViewLoadCounter;
 JS2ObjC *standardJS2ObjC;
 BOOL webViewSwizzed;
 
@@ -26,60 +26,88 @@ BOOL webViewSwizzed;
 
 @implementation NSObject(JS2ObjC)
 
-- (void)webViewDidFinishLoad_ConJS:(UIWebView *)webView
+- (void)webViewDidFinishLoad_JS2ObjC:(UIWebView *)webView
 {
     [standardJS2ObjC webViewDidFinishLoad:webView];
-    [self webViewDidFinishLoad_ConJS:webView];
+    [self webViewDidFinishLoad_JS2ObjC:webView];
 }
 
-- (BOOL)webView_ConJS:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+- (BOOL)webView_JS2ObjC:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
     if ([standardJS2ObjC webView:webView shouldStartLoadWithRequest:request navigationType:navigationType]) {
-        return [self webView_ConJS:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+        return [self webView_JS2ObjC:webView shouldStartLoadWithRequest:request navigationType:navigationType];
     }
     return NO;
 }
 
-- (BOOL)webView_ConJS_OriginalMissing:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+- (BOOL)webView_JS2ObjC_OriginalMissing:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
     return [standardJS2ObjC webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
 }
 
 @end
 
+@interface UIWebView(JS2ObjC)
+@property (nonatomic) NSInteger pageLoadCount;
+
+@end
+
 @implementation UIWebView(JS2ObjC)
+@dynamic pageLoadCount;
 
-- (id)init_ConJS
+- (id)init_JS2ObjC
 {
-    self = [self init_ConJS];
+    self = [self init_JS2ObjC];
     if (self) {
         [standardJS2ObjC initializedWebView:self];
     }
     return self;
 }
 
-- (id)initWithCoder_ConJS:(NSCoder *)coder
+- (id)initWithCoder_JS2ObjC:(NSCoder *)coder
 {
-    self = [self initWithCoder_ConJS:coder];
+    self = [self initWithCoder_JS2ObjC:coder];
     if (self) {
         [standardJS2ObjC initializedWebView:self];
     }
     return self;
 }
 
-- (id)initWithFrame_ConJS:(CGRect)frame
+- (id)initWithFrame_JS2ObjC:(CGRect)frame
 {
-    self = [self initWithFrame_ConJS:frame];
+    self = [self initWithFrame_JS2ObjC:frame];
     if (self) {
         [standardJS2ObjC initializedWebView:self];
     }
     return self;
 }
 
-- (void)setDelegate_ConJS:(id<UIWebViewDelegate>)delegate
+- (void)setDelegate_JS2ObjC:(id<UIWebViewDelegate>)delegate
 {
-    [standardJS2ObjC swizzUIWebViewDelegateMethodes:delegate];
-    [self setDelegate_ConJS:delegate];
+    if (!delegate) {
+        [webViewLoadCounter removeObjectForKey:[NSNumber numberWithInteger:self.hash]];
+        [self setDelegate_JS2ObjC:standardJS2ObjC];
+    } else {
+        [standardJS2ObjC swizzUIWebViewDelegateMethodes:delegate];
+        [self setDelegate_JS2ObjC:delegate];
+    }
+}
+
+- (NSInteger)pageLoadCount
+{
+    NSNumber *hash = [NSNumber numberWithInteger:self.hash];
+    if ([webViewLoadCounter.allKeys containsObject:hash]) {
+        return [[webViewLoadCounter objectForKey:hash] integerValue];
+    } else {
+        [webViewLoadCounter setObject:@0 forKey:hash];
+        return 0;
+    }
+}
+
+- (void)setPageLoadCount:(NSInteger)pageLoadCount
+{
+    NSNumber *hash = [NSNumber numberWithInteger:self.hash];
+    [webViewLoadCounter setObject:[NSNumber numberWithInteger:pageLoadCount] forKey:hash];
 }
 
 @end
@@ -91,13 +119,15 @@ BOOL webViewSwizzed;
     if ((self = [super init])) {
         swizzedDelegateClassName = [NSMutableSet setWithObject:[self class]];
         jsFunctions = [NSMutableDictionary dictionary];
+        webViewLoadCounter = [NSMutableDictionary dictionary];
         standardJS2ObjC = self;
         if (!webViewSwizzed) {
             webViewSwizzed = YES;
-            swizz([UIWebView class], @selector(init), @selector(init_ConJS));
-            swizz([UIWebView class], @selector(initWithCoder:), @selector(initWithCoder_ConJS:));
-            swizz([UIWebView class], @selector(initWithFrame:), @selector(initWithFrame_ConJS:));
-            swizz([UIWebView class], @selector(setDelegate:), @selector(setDelegate_ConJS:));
+            Class klass = [UIWebView class];
+            swizz(klass, @selector(init), @selector(init_JS2ObjC));
+            swizz(klass, @selector(initWithCoder:), @selector(initWithCoder_JS2ObjC:));
+            swizz(klass, @selector(initWithFrame:), @selector(initWithFrame_JS2ObjC:));
+            swizz(klass, @selector(setDelegate:), @selector(setDelegate_JS2ObjC:));
         }
     }
     return self;
@@ -122,18 +152,18 @@ BOOL webViewSwizzed;
     Class klass = [delegate class];
     if (![swizzedDelegateClassName containsObject:klass]) {
         [swizzedDelegateClassName addObject:klass];
-        swizz(klass, @selector(webViewDidFinishLoad:), @selector(webViewDidFinishLoad_ConJS:));
+        swizz(klass, @selector(webViewDidFinishLoad:), @selector(webViewDidFinishLoad_JS2ObjC:));
         if ([delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
-            swizz(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), @selector(webView_ConJS:shouldStartLoadWithRequest:navigationType:));
+            swizz(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), @selector(webView_JS2ObjC:shouldStartLoadWithRequest:navigationType:));
         } else {
-            swizz(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), @selector(webView_ConJS_OriginalMissing:shouldStartLoadWithRequest:navigationType:));
+            swizz(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), @selector(webView_JS2ObjC_OriginalMissing:shouldStartLoadWithRequest:navigationType:));
         }
     }
 }
 
 - (void)addTarget:(id)target action:(SEL)sel withJSFunctionName:(NSString *)name
 {
-    NSArray *array = [NSArray arrayWithObjects:target, [NSString stringWithFormat:@"%s", sel_getName(sel)], nil];
+    NSArray *array = @[ target, [NSString stringWithFormat:@"%s", sel_getName(sel)] ];
     [jsFunctions setObject:array forKey:name];
 }
 
@@ -147,11 +177,65 @@ BOOL webViewSwizzed;
     [jsFunctions removeAllObjects];
 }
 
+
+- (void(^)(void))createFunction:(NSString *)jsFunction withWebView:(UIWebView *)webView
+{
+    NSString *identifier = [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id,func){window.addEventListener(id,function(){func();},false);return id;})('js2objc'+(++js2objc.lastId),%@)", jsFunction]];
+    NSInteger loadCount = webView.pageLoadCount;
+    return ^(){
+        if (webView.pageLoadCount == loadCount) {
+            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id){var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);})('%@');", identifier]];
+        }
+    };
+}
+
+- (void(^)(NSString *))createFunctionHasArgument:(NSString *)jsFunction withWebView:(UIWebView *)webView
+{
+    NSString *identifier = [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id,func){window.addEventListener(id,function(){func(js2objc.argValue);},false);return id;})('js2objc'+(++js2objc.lastId),%@)", jsFunction]];
+    NSInteger loadCount = webView.pageLoadCount;
+    return ^(NSString *arg){
+        if (webView.pageLoadCount == loadCount) {
+            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id, arg){js2objc.argValue=arg;var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);delete js2objc.argValue;})('%@', '%@');", identifier, arg]];
+        }
+    };
+}
+
+- (void (^)(NSArray *))createFunctionHasArguments:(NSString *)jsFunction numberOfArguments:(NSUInteger)number withWebView:(UIWebView *)webView
+{
+    NSMutableString *args = [NSMutableString stringWithString:@"js2objc.argValue0"];
+    for (NSUInteger i = 1; i < number; i++) {
+        [args appendFormat:@", js2objc.argValue%i", i];
+    }
+    NSString *identifier = [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id,func){window.addEventListener(id,function(){func(%@);},false);return id;})('js2objc'+(++js2objc.lastId),%@)", args, jsFunction]];
+    NSInteger loadCount = webView.pageLoadCount;
+    return ^(NSArray *args){
+        if (webView.pageLoadCount == loadCount) {
+            NSMutableString *aargs = [NSMutableString stringWithString:@"arg0"];
+            for (NSUInteger i = 1; i < number; i++) {
+                [aargs appendFormat:@", arg%i", i];
+            }
+            NSMutableString *fargs = [NSMutableString stringWithString:@"js2objc.argValue0=arg0;"];
+            for (NSUInteger i = 1; i < number; i++) {
+                [fargs appendFormat:@"js2objc.argValue%i=arg%i;", i, i];
+            }
+            NSMutableString *dargs = [NSMutableString stringWithString:@"delete js2objc.argValue0;"];
+            for (NSUInteger i = 1; i < number; i++) {
+                [dargs appendFormat:@"delete js2objc.argValue%i;", i];
+            }
+            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id, %@){%@var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);%@})('%@', '%@');", aargs, fargs, identifier, [args componentsJoinedByString:@"', '"], dargs]];
+        }
+    };
+}
+
 - (void)webViewDidFinishLoad:(UIWebView *)webView
 {
+    if ([[[webView stringByEvaluatingJavaScriptFromString:@"(window.js2objc == undefined)"] uppercaseString] isEqualToString:@"TRUE"]) {
+        [webView stringByEvaluatingJavaScriptFromString:@"var js2objc={returnValue:'',lastId:0};"];
+        webView.pageLoadCount++;
+    }
     for (NSString *key in jsFunctions.allKeys) {
       if([[[webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(window.%@ == undefined)", key]] uppercaseString] isEqualToString:@"TRUE"]){
-        [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"function %@(){var u='JS2ObjC://%@';for(var i=0;i<arguments.length;i++){u=u+'\t'+encodeURIComponent(arguments[i]);}var t=document.createElement('A');t.setAttribute('href',u);var e=document.createEvent('MouseEvent');e.initMouseEvent('click');t.dispatchEvent(e);return JS2ObjC_Return;}", key, key]];
+        [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"%@ = function(){var u='JS2ObjC://%@?';for(var i=0;i<arguments.length;i++){u=u+encodeURIComponent(arguments[i])+'&';}u=u.substr(0,u.length-1);var t=document.createElement('A');t.setAttribute('href',u);var e=document.createEvent('MouseEvent');e.initMouseEvent('click');t.dispatchEvent(e);var _return=js2objc.returnValue;delete js2objc.returnValue;return _return;}", key, key]];
       }
     }
 }
@@ -159,34 +243,34 @@ BOOL webViewSwizzed;
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
     if ([[request.URL.scheme uppercaseString] isEqualToString:@"JS2OBJC"]) {
-        NSArray *operationCodes = [[request.URL.absoluteString stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] componentsSeparatedByString:@"\t"];
-        NSString *jsfunc = [[operationCodes objectAtIndex:0] substringFromIndex:10];
+        NSString *jsfunc = request.URL.host;
+        NSArray *operationCodes = [request.URL.query componentsSeparatedByString:@"&"];
         id target = [[jsFunctions objectForKey:jsfunc] objectAtIndex:0];
         SEL sel = sel_getUid([[[jsFunctions objectForKey:jsfunc] objectAtIndex:1] cStringUsingEncoding:NSUTF8StringEncoding]);
         id _return;
         if ([target respondsToSelector:sel]) {
-            id _args;
-            if (operationCodes.count > 1) {
-                _args = [operationCodes subarrayWithRange:NSMakeRange(1, operationCodes.count - 1)];
+            NSMutableArray *_args = [NSMutableArray array];
+            for (NSString *arg in operationCodes) {
+                [_args addObject:[arg stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
             }
             if ([[NSString stringWithFormat:@"%s", [target methodSignatureForSelector:sel].methodReturnType] isEqualToString:@"@"]) {
                 if (_args) {
-                    _return = objc_msgSend(target, sel, _args);
+                    _return = objc_msgSend(target, sel, _args, webView);
                 } else {
-                    _return = objc_msgSend(target, sel);
+                    _return = objc_msgSend(target, sel, _args, webView);
                 }
             } else {
                 if (_args) {
-                    objc_msgSend(target, sel, _args);
+                    objc_msgSend(target, sel, _args, webView);
                 } else {
-                    objc_msgSend(target, sel);
+                    objc_msgSend(target, sel, _args, webView);
                 }
             }
         }
         if (_return) {
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"JS2ObjC_Return='%@';", _return]];
+            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"js2objc.returnValue='%@';", _return]];
         } else {
-            [webView stringByEvaluatingJavaScriptFromString:@"JS2ObjC_Return='';"];
+            [webView stringByEvaluatingJavaScriptFromString:@"js2objc.returnValue='';"];
         }
         return NO;
     }
