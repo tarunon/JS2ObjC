@@ -254,17 +254,9 @@ BOOL webViewSwizzed;
                 [_args addObject:[arg stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
             }
             if ([[NSString stringWithFormat:@"%s", [target methodSignatureForSelector:sel].methodReturnType] isEqualToString:@"@"]) {
-                if (_args) {
-                    _return = objc_msgSend(target, sel, _args, webView);
-                } else {
-                    _return = objc_msgSend(target, sel, _args, webView);
-                }
+                _return = objc_msgSend(target, sel, _args, webView);
             } else {
-                if (_args) {
-                    objc_msgSend(target, sel, _args, webView);
-                } else {
-                    objc_msgSend(target, sel, _args, webView);
-                }
+                objc_msgSend(target, sel, _args, webView);
             }
         }
         if (_return) {
