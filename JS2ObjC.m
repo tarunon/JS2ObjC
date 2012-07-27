@@ -182,9 +182,10 @@ BOOL webViewSwizzed;
 {
     NSString *identifier = [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id,func){window.addEventListener(id,function(){func();},false);return id;})('js2objc'+(++js2objc.lastId),%@)", jsFunction]];
     NSInteger loadCount = webView.pageLoadCount;
+    __weak UIWebView *_webView = webView;
     return ^(){
-        if (webView.pageLoadCount == loadCount) {
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id){var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);})('%@');", identifier]];
+        if (_webView.pageLoadCount == loadCount) {
+            [_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id){var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);})('%@');", identifier]];
         }
     };
 }
@@ -193,9 +194,10 @@ BOOL webViewSwizzed;
 {
     NSString *identifier = [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id,func){window.addEventListener(id,function(){func(js2objc.argValue);},false);return id;})('js2objc'+(++js2objc.lastId),%@)", jsFunction]];
     NSInteger loadCount = webView.pageLoadCount;
+    __weak UIWebView *_webView = webView;
     return ^(NSString *arg){
-        if (webView.pageLoadCount == loadCount) {
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id, arg){js2objc.argValue=arg;var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);delete js2objc.argValue;})('%@', '%@');", identifier, arg]];
+        if (_webView.pageLoadCount == loadCount) {
+            [_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id, arg){js2objc.argValue=arg;var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);delete js2objc.argValue;})('%@', '%@');", identifier, arg]];
         }
     };
 }
@@ -208,8 +210,9 @@ BOOL webViewSwizzed;
     }
     NSString *identifier = [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id,func){window.addEventListener(id,function(){func(%@);},false);return id;})('js2objc'+(++js2objc.lastId),%@)", args, jsFunction]];
     NSInteger loadCount = webView.pageLoadCount;
+    __weak UIWebView *_webView = webView;
     return ^(NSArray *args){
-        if (webView.pageLoadCount == loadCount) {
+        if (_webView.pageLoadCount == loadCount) {
             NSMutableString *aargs = [NSMutableString stringWithString:@"arg0"];
             for (NSUInteger i = 1; i < number; i++) {
                 [aargs appendFormat:@", arg%i", i];
@@ -222,7 +225,7 @@ BOOL webViewSwizzed;
             for (NSUInteger i = 1; i < number; i++) {
                 [dargs appendFormat:@"delete js2objc.argValue%i;", i];
             }
-            [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id, %@){%@var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);%@})('%@', '%@');", aargs, fargs, identifier, [args componentsJoinedByString:@"', '"], dargs]];
+            [_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"(function(id, %@){%@var e=document.createEvent('UIEvent');e.initUIEvent(id);window.dispatchEvent(e);%@})('%@', '%@');", aargs, fargs, identifier, [args componentsJoinedByString:@"', '"], dargs]];
         }
     };
 }
