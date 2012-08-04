@@ -40,8 +40,9 @@
 
 + (JS2ObjC *)standardJS2ObjC;
 - (void)addTarget:(id)target action:(SEL)sel withJSFunctionName:(NSString *)name;
+- (void)addJSFunctionName:(NSString *)name usingBlock:(NSString*(^)(NSArray *arguments, UIWebView *webView))block;
 - (void)removeJSFunctionName:(NSString *)name;
-- (void)removeAllTargets;
+- (void)removeAllJSFunctions;
 - (void(^)(void))createFunction:(NSString *)jsFunction withWebView:(UIWebView *)webView;
 - (void(^)(NSString *))createFunctionHasArgument:(NSString *)jsFunction withWebView:(UIWebView *)webView;
 - (void(^)(NSArray *))createFunctionHasArguments:(NSString *)jsFunction numberOfArguments:(NSUInteger)number withWebView:(UIWebView *)webView;
