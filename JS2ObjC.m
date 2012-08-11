@@ -96,6 +96,9 @@ BOOL webViewSwizzed;
         [self.client URLProtocol:self didLoadData:(NSData *)^{
             if (ishtml) {
                 NSString *source = [[NSString alloc] initWithData:_data encoding:NSUTF8StringEncoding];
+                if (!source.length) {
+                    return (NSData *)_data;
+                }
                 NSInteger loc = [source rangeOfString:@"<HTML"].location;
                 if (loc == NSNotFound) {
                     loc = [source rangeOfString:@"<html"].location;
@@ -119,6 +122,9 @@ BOOL webViewSwizzed;
     if ([cachedResponse.response.MIMEType isEqualToString:@"text/html"]) {
         cachedResponse = [[NSCachedURLResponse alloc] initWithResponse:cachedResponse.response data:(NSData *)^{
             NSString *source = [[NSString alloc] initWithData:cachedResponse.data encoding:NSUTF8StringEncoding];
+            if (!source.length) {
+                return cachedResponse.data;
+            }
             NSInteger loc = [source rangeOfString:@"<HTML"].location;
             if (loc == NSNotFound) {
                 loc = [source rangeOfString:@"<html"].location;
@@ -157,20 +163,16 @@ BOOL webViewSwizzed;
 
 @end
 
-@implementation NSObject(JS2ObjC)
-
-- (BOOL)webView_JS2ObjC:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+static BOOL webViewShouldStartLoadWithRequestIMP(id self,SEL _cmd,id webView, id request, UIWebViewNavigationType navigationType)
 {
     if (![standardJS2ObjC webView:webView js2objcRequest:request]) {
-        if ([self webView_JS2ObjC:webView shouldStartLoadWithRequest:request navigationType:navigationType]) {
+        if ((BOOL)objc_msgSend(self, sel_getUid("webView_js2objc:shouldStartLoadWithRequest:navigationType:"), webView, request, navigationType)) {
             [NSURLProtocol registerClass:[JCURLProtocol class]];
             return YES;
         }
     }
     return NO;
 }
-
-@end
 
 @implementation UIWebView(JS2ObjC)
 
@@ -228,7 +230,6 @@ BOOL webViewSwizzed;
             swizz_js2objc(klass, @selector(initWithCoder:), @selector(initWithCoder_JS2ObjC:));
             swizz_js2objc(klass, @selector(initWithFrame:), @selector(initWithFrame_JS2ObjC:));
             swizz_js2objc(klass, @selector(setDelegate:), @selector(setDelegate_JS2ObjC:));
-            [self swizzUIWebViewDelegateMethodes:self];
         }
         [self updateJSFunction];
     }
@@ -256,7 +257,9 @@ BOOL webViewSwizzed;
     Class klass = [delegate class];
     if (![swizzedDelegateClassName containsObject:klass]) {
         [swizzedDelegateClassName addObject:klass];
-        swizz_js2objc(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), @selector(webView_JS2ObjC:shouldStartLoadWithRequest:navigationType:));
+        SEL sel = sel_registerName("webView_js2objc:shouldStartLoadWithRequest:navigationType:");
+        class_addMethod([delegate class], sel, (IMP)webViewShouldStartLoadWithRequestIMP, "@@:@@");
+        swizz_js2objc(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), sel);
     }
 }
 
