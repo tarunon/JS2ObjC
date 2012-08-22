@@ -140,6 +140,11 @@ BOOL webViewSwizzed;
     return cachedResponse;
 }
 
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{
+    [self.client URLProtocol:self didFailWithError:error];
+}
+
 - (void)connection:(NSURLConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     [self.client URLProtocol:self didCancelAuthenticationChallenge:challenge];
