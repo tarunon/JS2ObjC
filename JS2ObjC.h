@@ -43,7 +43,11 @@
 - (void)addJSFunctionName:(NSString *)name usingBlock:(id(^)(NSArray *arguments, UIWebView *webView))block;
 - (void)removeJSFunctionName:(NSString *)name;
 - (void)removeAllJSFunctions;
+<<<<<<< HEAD
 - (id(^)(NSArray *))createFunction:(NSString *)jsFunction withWebView:(UIWebView *)webView;
+=======
+- (id(^)(NSArray *))createFunction:(NSString *)function withWebView:(UIWebView *)webView;
+>>>>>>> JS2ObjC v4.1.0
 
 @end
 
