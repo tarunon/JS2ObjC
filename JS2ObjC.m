@@ -339,7 +339,6 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
         SEL sel = @selector(webView_JS2ObjC:shouldStartLoadWithRequest:navigationType:);
         class_addMethod([delegate class], sel, (IMP)webViewShouldStartLoadWithRequestIMP, "@@:@@");
         swizz_js2objc(klass, @selector(webView:shouldStartLoadWithRequest:navigationType:), sel);
-        NSLog([UIDevice currentDevice].name);
         if ([[UIDevice currentDevice].name hasSuffix:@"Simulator"]) {
             sel = @selector(webViewDidFinishLoad_JS2ObjC:);
             class_addMethod([delegate class], sel, (IMP)webViewDidFinishLoadIMP, "@@:@@");
