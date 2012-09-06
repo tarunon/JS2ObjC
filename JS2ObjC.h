@@ -33,6 +33,8 @@
 //  The Objective-C's functions argument are one NSArray including NSString(s)
 //  that JavaScript's functions argument(s), and webview that called JavaScript's function.
 //  You can create blocks object from JavaScript's function string.
+//  If you use JS2ObjC's functions in HTML,
+//  please write "<script type="text/javascript" src="js2objc.js"></script>".
 
 #import <Foundation/Foundation.h>
 
@@ -43,6 +45,7 @@
 - (void)addJSFunctionName:(NSString *)name usingBlock:(id(^)(NSArray *arguments, UIWebView *webView))block;
 - (void)removeJSFunctionName:(NSString *)name;
 - (void)removeAllJSFunctions;
+- (void)setJSPropertyForKey:(NSString *)key value:(id)value withWebView:(UIWebView *)webView;
 - (id(^)(NSArray *))createFunction:(NSString *)function withWebView:(UIWebView *)webView;
 
 @end
