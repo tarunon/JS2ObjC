@@ -285,6 +285,7 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
         }
     }];
     [jsFunctions removeObjectsForKeys:remover];
+    [[JS2ObjC standardJS2ObjC] updateJSFunction];
 }
 
 @end
@@ -346,13 +347,18 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
 - (void)removeJSFunction:(JSClass *)function
 {
     NSString *name = function.className;
-    NSMutableArray *remover = [NSMutableArray array];
-    [jsFunctions enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        if ([key hasPrefix:name]) {
-            [remover addObject:key];
-        }
-    }];
-    [jsFunctions removeObjectsForKeys:remover];
+    if (name) {
+        NSMutableArray *remover = [NSMutableArray array];
+        [jsFunctions enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+            if ([key hasPrefix:name]) {
+                [remover addObject:key];
+            }
+        }];
+        [jsFunctions removeObjectsForKeys:remover];
+    } else {
+        [jsFunctions removeAllObjects];
+    }
+    [self updateJSFunction];
 }
 
 - (void)setAnyScript:(NSString *)anyScript
