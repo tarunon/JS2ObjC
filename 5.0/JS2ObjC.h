@@ -39,36 +39,25 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@interface JSClass : NSObject
-
-- (JSClass *)addTarget:(id)target action:(SEL)sel withJSFunctionName:(NSString *)name;
-- (JSClass *)addJSFunctionName:(NSString *)name usingBlock:(id(^)(NSArray *arguments, UIWebView *webView))block;
-- (void)removeJSFunctionName:(NSString *)name;
-
-@end
-
-@interface JS2ObjC : JSClass
+@interface JS2ObjC : NSObject
 
 @property (nonatomic) NSString *anyScript;
 
 + (JS2ObjC *)standardJS2ObjC;
-- (void)removeJSFunction:(JSClass *)function;
+- (void)addTarget:(id)target action:(SEL)sel withJSFunctionName:(NSString *)name;
+- (void)addJSFunctionName:(NSString *)name usingBlock:(id(^)(NSArray *arguments, UIWebView *webView))block;
+- (void)removeJSFunctionName:(NSString *)name;
+- (void)removeAllJSFunctions;
+- (void)setJSPropertyForKey:(NSString *)key value:(id)value;
+
+- (id(^)(NSArray *))createFunction:(NSString *)function withWebView:(UIWebView *)webView;
+//It is old method. You should use JSFunction class, and addJSFunctionName:usingBlock:'s arguments contains JSFunction instance.
 
 @end
 
-@interface UIWebView(JS2ObjC)
+@interface JSFunction : NSString
 
-- (void)setJSProperty:(id)value forKey:(NSString *)key;
-- (id)jsPropertyForKey:(NSString *)key;
-- (id)jsSelfObject;
-// There are able to used in JSClass's target action or block method(s).
-
-@end
-
-@interface JSFunction : JSClass
-
-- (id)initWithFunctionName:(NSString *)name withWebView:(UIWebView *)webView;
+- (id)initWithFunctionString:(NSString *)function withWebView:(UIWebView *)webView;
 - (id)runWithArguments:(NSArray *)arguments;
-// Run the function with arguments.
 
 @end
