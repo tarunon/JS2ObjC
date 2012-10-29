@@ -103,7 +103,7 @@ static NSString *cast2JS (id object)
             [_return appendString:@"}"];
         }
     } else if ([object isKindOfClass:[JSClass class]]) {
-        [_return appendString:object];
+        [_return appendString:[object className]];
     } else if (object) {
         [_return appendFormat:@"\"%@\"", object];
     } else {
