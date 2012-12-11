@@ -69,6 +69,7 @@
 
 - (id)initWithFunctionName:(NSString *)name withWebView:(UIWebView *)webView;
 - (id)runWithArguments:(NSArray *)arguments;
+- (void)makeNewValue:(NSString *)value withArguments:(NSArray *)arguments;
 // Run the function with arguments.
 
 @end

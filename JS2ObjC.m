@@ -16,7 +16,6 @@ UIWebView *currentWebView;
 NSMutableDictionary *jsFunctions;
 NSMutableSet *tempJSFunctions;
 NSString *jsFunction;
-BOOL webViewSwizzed, jsFunctionAddedFunction;
 
 @interface JS2ObjC()<UIWebViewDelegate>
 
@@ -76,7 +75,7 @@ static void swizz_js2objc(Class klass, SEL sel1, SEL sel2)
 
 static NSString *implementCode (NSString *name)
 {
-    return [NSString stringWithFormat:@"%@=function(){js2objc.currents.push(this);_return=js2objc.perform('%@',Array.prototype.slice.apply(arguments));js2objc.currents.pop();return _return;};", name, name];
+    return [NSString stringWithFormat:@"%@=function(){js2objc.currents.push(this);var res= js2objc.perform('%@',Array.prototype.slice.apply(arguments));js2objc.currents.pop();delete js2objc.res;return res;};", name, name];
 }
 
 static NSString *cast2JS (id object)
@@ -249,6 +248,11 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
     return _class;
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: 0x%X; function = \"%@\">", NSStringFromClass([self class]), (int)self, _class];
+}
+
 - (NSString *)childClassName:(NSString *)name
 {
     return _class ? [NSString stringWithFormat:@"%@.prototype.%@", _class, name] : name;
@@ -292,33 +296,31 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
 
 @implementation JS2ObjC
 
++ (id)alloc
+{
+    return standardJS2ObjC ? standardJS2ObjC : [super alloc];
+}
+
 - (id)init
 {
-    if (standardJS2ObjC) {
-        self = standardJS2ObjC;
-    } else if ((self = [super init])) {
+    if (!standardJS2ObjC && (self = [super init])) {
         jsFunctions = [NSMutableDictionary dictionary];
         tempJSFunctions = [NSMutableSet set];
-        if (!webViewSwizzed) {
-            webViewSwizzed = YES;
-            Class klass = [UIWebView class];
-            swizz_js2objc(klass, @selector(init), @selector(init_JS2ObjC));
-            swizz_js2objc(klass, @selector(initWithCoder:), @selector(initWithCoder_JS2ObjC:));
-            swizz_js2objc(klass, @selector(initWithFrame:), @selector(initWithFrame_JS2ObjC:));
-            swizz_js2objc(klass, @selector(setDelegate:), @selector(setDelegate_JS2ObjC:));
-        }
         [NSURLProtocol registerClass:[JSURLProtocol class]];
+        Class klass = [UIWebView class];
+        swizz_js2objc(klass, @selector(init), @selector(init_JS2ObjC));
+        swizz_js2objc(klass, @selector(initWithCoder:), @selector(initWithCoder_JS2ObjC:));
+        swizz_js2objc(klass, @selector(initWithFrame:), @selector(initWithFrame_JS2ObjC:));
+        swizz_js2objc(klass, @selector(setDelegate:), @selector(setDelegate_JS2ObjC:));
         [self updateJSFunction];
+        standardJS2ObjC = self;
     }
     return self;
 }
 
 + (JS2ObjC *)standardJS2ObjC
 {
-    if (!standardJS2ObjC) {
-        standardJS2ObjC = [[JS2ObjC alloc] init];
-    }
-    return standardJS2ObjC;
+    return [[JS2ObjC alloc] init];
 }
 
 - (void)initializedWebView:(UIWebView *)webView
@@ -370,7 +372,7 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
 - (void)updateJSFunction
 {
     jsFunction = (NSString *)^{
-        NSMutableString *_return = [NSMutableString stringWithString:@"var js2objc={currents:[],functions:[], perform:function(method,args){var u='JS2ObjC://'+method+'/'+js2objc.identifier+'?';for(var i=0;i<args.length;i++){u=u+encodeURIComponent(js2objc.json(args[i]))+'&';}u=u.substr(0,u.length-1);var t=document.createElement('A');t.href=u;var e=document.createEvent('MouseEvent');e.initMouseEvent('click');t.dispatchEvent(e);return js2objc.currents[js2objc.currents.length-1]._return;},json:function(arg){if(typeof(arg)=='function'){js2objc.functions.push(arg);return '\"js2objc.functions['+(js2objc.functions.length-1)+']\"';}else if(arg instanceof Array){if(arg.length){var r='';arg.forEach(function(i){r+=js2objc.json(i)+',';});return '['+r.substr(0,r.length-1)+']';}else{return '[]';}}else if(arg instanceof Object){if(Object.keys(arg).length){var r='';Object.keys(arg).forEach(function(i){r+=js2objc.json(i)+':'+js2objc.json(arg[i])+',';});return '{'+r.substr(0,r.length-1)+'}';}};if((''+arg).indexOf('object')==1){return '{}'}else{return '\"'+arg+'\"';}},rand:function(l){var s='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';var r='';for(var i=0;i<l;i++){r+=s[Math.floor(Math.random()*s.length)];}return r;}};js2objc.identifier=js2objc.rand(10);"];
+        NSMutableString *_return = [NSMutableString stringWithString:@"var js2objc={currents:[],functions:[],usedidxs:[],perform:function(method,args){var u='JS2ObjC://'+method+'/'+js2objc.identifier+'?'+encodeURIComponent(js2objc.json(args));var t=document.createElement('A');t.href=u;var e=document.createEvent('MouseEvent');e.initMouseEvent('click');t.dispatchEvent(e);return js2objc.res;},json:function(arg){if(typeof(arg)=='function'){if(js2objc.usedidxs.length){var j=js2objc.usedidxs.pop();js2objc.functions[j]=arg;return '\"js2objc.functions['+j+']\"';}else{js2objc.functions.push(arg);return '\"js2objc.functions['+(js2objc.functions.length-1)+']\"';}}else if(arg instanceof Array){if(arg.length){var r='';arg.forEach(function(i){r+=js2objc.json(i)+',';});return '['+r.substr(0,r.length-1)+']';}else{return '[]';}}else if(arg instanceof Object){if(Object.keys(arg).length){var r='';Object.keys(arg).forEach(function(i){r+=js2objc.json(i)+':'+js2objc.json(arg[i])+',';});return '{'+r.substr(0,r.length-1)+'}';}};if((''+arg).indexOf('object')==1){return '{}'}else{return '\"'+arg+'\"';}},rand:function(l){var s='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';var r='';for(var i=0;i<l;i++){r+=s[Math.floor(Math.random()*s.length)];}return r;}};js2objc.identifier=js2objc.rand(10);"];
         [[jsFunctions.allKeys sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)] enumerateObjectsUsingBlock:^(NSString *key, NSUInteger idx, BOOL *stop) {
             [_return appendString:implementCode(key)];
         }];
@@ -387,10 +389,6 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
         if ([[webView stringByEvaluatingJavaScriptFromString:@"js2objc.identifier"] isEqualToString:request.URL.lastPathComponent]) {
             NSString *jsfunc = request.URL.host;
             currentWebView = webView;
-            NSMutableArray *_args = [NSMutableArray array];
-            [[request.URL.query componentsSeparatedByString:@"&"] enumerateObjectsUsingBlock:^(NSString *arg, NSUInteger idx, BOOL *stop) {
-                [_args addObject:cast2ObjC([arg stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding])];
-            }];
             __block id(^blk)(NSArray *arguments, UIWebView *webView) = [jsFunctions objectForKey:jsfunc];
             if (!blk) {
                 [tempJSFunctions enumerateObjectsUsingBlock:^(JSFunction *func, BOOL *stop) {
@@ -400,7 +398,7 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
                 }];
             }
             if (blk) {
-                [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"js2objc.currents[js2objc.currents.length-1]._return=%@;", cast2JS(blk(_args, webView))]];
+                [webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"js2objc.res=%@;", cast2JS(blk(cast2ObjC([request.URL.query stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]), webView))]];
             }
             currentWebView = nil;
         }
@@ -420,6 +418,14 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
         _identifier = [_webView stringByEvaluatingJavaScriptFromString:@"js2objc.identifier;"];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    if (_webView && [_class hasPrefix:@"js2objc.functions["] && [_class hasSuffix:@"]"]) {
+        NSArray *functionComponents = [_class componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"[]"]];
+        [_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"if(js2objc.identifier=='%@'){js2objc.usedidxs.push(%@);}", _identifier,  [functionComponents objectAtIndex:functionComponents.count - 2]]];
+    }
 }
 
 - (id)jsFunctionBlockWithName:(NSString *)name
@@ -445,26 +451,30 @@ static void webViewDidFinishLoadIMP(id self, SEL _cmd, id webView)
     return [[JSFunction alloc] initWithClassName:name];
 }
 
+- (NSString *)argString:(NSArray *)arguments;
+{
+    currentWebView = _webView;
+    NSMutableString *res = [NSMutableString stringWithString:arguments ? cast2JS(arguments) : @"[]"];
+    [res deleteCharactersInRange:NSMakeRange(res.length - 1, 1)];
+    [res deleteCharactersInRange:NSMakeRange(0, 1)];
+    currentWebView = nil;
+    return res;
+}
+
 - (id)runWithArguments:(NSArray *)arguments
 {
     if (!_webView) {
         NSLog(@"JSFunction warning!! : webview is nil.");
     }
-    currentWebView = _webView;
-    NSMutableString *arg = [NSMutableString string];
-    if ([arguments isKindOfClass:[NSArray class]]) {
-        if (arguments.count) {
-            [arguments enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                [arg appendFormat:@"%@,", cast2JS(obj)];
-            }];
-            [arg deleteCharactersInRange:NSMakeRange(arg.length - 1, 1)];
-        }
-    } else {
-        arg = [NSMutableString stringWithString:cast2JS(arguments)];
+    return cast2ObjC([_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"if(js2objc.identifier=='%@'){js2objc.json(%@(%@));}", _identifier, _class, [self argString:arguments]]]);
+}
+
+- (void)makeNewValue:(NSString *)value withArguments:(NSArray *)arguments
+{
+    if (!_webView) {
+        NSLog(@"JSFunction warning!! : webview is nil.");
     }
-    id _return = cast2ObjC([[_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"if(js2objc.identifier=='%@'){encodeURIComponent(js2objc.json(%@(%@)));}", _identifier, _class, arg]] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
-    currentWebView = nil;
-    return _return;
+    [_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"var %@;if(js2objc.identifier=='%@'){%@=new %@(%@);}", value, _identifier, value, _class, [self argString:arguments]]];
 }
 
 @end
