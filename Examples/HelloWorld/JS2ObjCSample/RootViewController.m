@@ -11,6 +11,8 @@
         JS2ObjC* js2objc = [JS2ObjC standardJS2ObjC];
         [js2objc addTarget:self action:@selector(helloWorld) withJSFunctionName:@"helloWorld"];
         [js2objc addTarget:self action:@selector(searchHello:webView:) withJSFunctionName:@"sayHello"];
+        [js2objc addTarget:self action:@selector(arrayDictSample:) withJSFunctionName:@"arrayDictSample"];
+        [js2objc addTarget:self action:@selector(functionSample:) withJSFunctionName:@"functionSample"];
     }
     return self;
 }
@@ -38,4 +40,19 @@
     }
     return @"Say Hello :(";
 }
+
+- (void)arrayDictSample:(NSArray *)arguments
+{
+    NSArray *ary = [arguments objectAtIndex:0];
+    NSDictionary *dict = [arguments objectAtIndex:1];
+    NSLog(@"%@", ary);
+    NSLog(@"%@", dict);
+}
+
+- (void)functionSample:(NSArray *)arguments
+{
+    JSFunction *function = arguments.lastObject;
+    [function runWithArguments:@[@"You can use Javascript function from Objective-C"]];
+}
+
 @end
