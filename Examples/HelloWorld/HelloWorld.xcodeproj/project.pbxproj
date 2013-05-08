@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		079499B81599B81E0047C9F0 /* server in Resources */ = {isa = PBXBuildFile; fileRef = 079499B71599B81E0047C9F0 /* server */; };
-		079499BC1599B99E0047C9F0 /* JS2ObjC.m in Sources */ = {isa = PBXBuildFile; fileRef = 079499BB1599B8420047C9F0 /* JS2ObjC.m */; };
 		07B473E91599AB5100E721F9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07B473E81599AB5100E721F9 /* UIKit.framework */; };
 		07B473EB1599AB5100E721F9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07B473EA1599AB5100E721F9 /* Foundation.framework */; };
 		07B473ED1599AB5100E721F9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 07B473EC1599AB5100E721F9 /* CoreGraphics.framework */; };
@@ -16,12 +15,11 @@
 		07B473F51599AB5100E721F9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B473F41599AB5100E721F9 /* main.m */; };
 		07B473F91599AB5100E721F9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B473F81599AB5100E721F9 /* AppDelegate.m */; };
 		07B474031599AB8200E721F9 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 07B474021599AB8200E721F9 /* RootViewController.m */; };
+		11969D40173A2E2C001220E6 /* JS2ObjC.m in Sources */ = {isa = PBXBuildFile; fileRef = 11969D3F173A2E2C001220E6 /* JS2ObjC.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		079499B71599B81E0047C9F0 /* server */ = {isa = PBXFileReference; lastKnownFileType = folder; path = server; sourceTree = "<group>"; };
-		079499BA1599B8420047C9F0 /* JS2ObjC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JS2ObjC.h; path = ../../JS2ObjC.h; sourceTree = "<group>"; };
-		079499BB1599B8420047C9F0 /* JS2ObjC.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = JS2ObjC.m; path = ../../JS2ObjC.m; sourceTree = "<group>"; };
 		07B473E41599AB5100E721F9 /* HelloWorld.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloWorld.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		07B473E81599AB5100E721F9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		07B473EA1599AB5100E721F9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -34,6 +32,8 @@
 		07B473F81599AB5100E721F9 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		07B474011599AB8200E721F9 /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		07B474021599AB8200E721F9 /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
+		11969D3E173A2E2C001220E6 /* JS2ObjC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JS2ObjC.h; path = ../../../JS2ObjC.h; sourceTree = "<group>"; };
+		11969D3F173A2E2C001220E6 /* JS2ObjC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JS2ObjC.m; path = ../../../JS2ObjC.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,8 +53,6 @@
 		07B473D91599AB5100E721F9 = {
 			isa = PBXGroup;
 			children = (
-				079499BA1599B8420047C9F0 /* JS2ObjC.h */,
-				079499BB1599B8420047C9F0 /* JS2ObjC.m */,
 				079499B71599B81E0047C9F0 /* server */,
 				07B473EE1599AB5100E721F9 /* JS2ObjCSample */,
 				07B473E71599AB5100E721F9 /* Frameworks */,
@@ -89,6 +87,8 @@
 				07B473F81599AB5100E721F9 /* AppDelegate.m */,
 				07B474011599AB8200E721F9 /* RootViewController.h */,
 				07B474021599AB8200E721F9 /* RootViewController.m */,
+				11969D3E173A2E2C001220E6 /* JS2ObjC.h */,
+				11969D3F173A2E2C001220E6 /* JS2ObjC.m */,
 				07B473EF1599AB5100E721F9 /* Supporting Files */,
 			);
 			path = JS2ObjCSample;
@@ -167,10 +167,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				079499BC1599B99E0047C9F0 /* JS2ObjC.m in Sources */,
 				07B473F51599AB5100E721F9 /* main.m in Sources */,
 				07B473F91599AB5100E721F9 /* AppDelegate.m in Sources */,
 				07B474031599AB8200E721F9 /* RootViewController.m in Sources */,
+				11969D40173A2E2C001220E6 /* JS2ObjC.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,6 +239,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/Volumes/HDD/Users/kstg/src/JS2ObjC,
+					"\"$(SRCROOT)/../..\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "JS2ObjCSample/HelloWorld-Prefix.pch";
@@ -254,6 +255,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/Volumes/HDD/Users/kstg/src/JS2ObjC,
+					"\"$(SRCROOT)/../..\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "JS2ObjCSample/HelloWorld-Prefix.pch";
