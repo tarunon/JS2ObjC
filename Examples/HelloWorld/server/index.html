@@ -1,26 +1,29 @@
 <html>
-  <body>
-
-<a href="#" onclick="evalObjC1()">Hello World</a><br/>
-<a href="#" onclick="evalObjC2()">Say Hello</a><br/>
-<a href="#" onclick="evalObjC3()">Array Dictionary Sample</a><br/>
-<a href="#" onclick="evalObjC4()">Function Sample</a><br/>
-      
-<script>
-    function evalObjC1(){
-        helloWorld();
-    }
-    function evalObjC2(){
-        alert(sayHello(prompt('Say Hello!','')));
-    }
-    function evalObjC3(){
-        arrayDictSample(['You','can','use','array'],{'and':'dictionary','so':'on'});
-    }
-    function evalObjC4(){
-        functionSample(function(a){alert(a)});
-    }
-</script>
-
-
-</body>
+    <head>
+        <script type='text/javascript' src='js2objc.js'></script>
+    </head>
+    <body>
+        
+        <a href="#" onclick="evalObjC1()">Hello World</a><br/>
+        <a href="#" onclick="evalObjC2()">Say Hello</a><br/>
+        <a href="#" onclick="evalObjC3()">Array Dictionary Sample</a><br/>
+        <a href="#" onclick="evalObjC4()">Function Sample</a><br/>
+        
+        <script>
+            function evalObjC1(){
+                helloWorld();
+            }
+            function evalObjC2(){
+                alert(sayHello(prompt('Say Hello!','')));
+            }
+            function evalObjC3(){
+                arrayDictSample(['You','can','use','array'],{'and':'dictionary','so':'on'});
+            }
+            function evalObjC4(){
+                functionSample(function(a){alert(a)});
+            }
+        </script>
+        
+        
+    </body>
 </html>
