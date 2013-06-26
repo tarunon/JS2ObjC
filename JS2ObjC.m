@@ -94,7 +94,7 @@ static NSString *cast2JS (id object)
     } else if ([object isKindOfClass:[NSDictionary class]]) {
         [_return appendString:@"{"];
         [object enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-            [_return appendFormat:@"%@,", cast2JS(obj)];
+            [_return appendFormat:@"\"%@\":%@,",key, cast2JS(obj)];
         }];
         if (_return.length > 1) {
             [_return replaceCharactersInRange:NSMakeRange(_return.length - 1, 1) withString:@"}"];
